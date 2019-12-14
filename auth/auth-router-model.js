@@ -1,7 +1,7 @@
 const db = require('../database/dbConfig.js');
 
 async function add(user) {
-  const id = await db('users').insert(user);
+  const id = db('users').insert(user);
   return id
 }
 
