@@ -1,6 +1,8 @@
 const router = require('express').Router();
 const Users = require("./auth-router-model")
 const bcrypt = require("bcryptjs")
+const jwt = require("jsonwebtoken")
+const secrets = require("./secrets")
 
 router.post('/register', (req, res) => {
   let user = req.body
@@ -9,8 +11,9 @@ router.post('/register', (req, res) => {
 
   Users.add(user)
     .then(user => {
-      console.log(user)
-      res.status(200).json(user)
+      const token = genToken(user)
+      console.log(token)
+      res.status(200).json(user, token)
     })
     .catch(err => {
       res.status(500).json({error: err})
@@ -24,7 +27,8 @@ router.post('/login', (req, res) => {
     .first()
     .then(user => {
       if (user && bcrypt.compareSync(password, user.password)) {
-        res.status(200).json({message: "logged in!"})
+        const token = genToken(user)
+        res.status(200).json({message: "logged in!", token: token})
       }
     })
     .catch(err => {
@@ -41,5 +45,19 @@ router.get("/users", (req, res) => {
       res.status(500).json({error: err})
     })
 })
+
+function genToken(user) {
+  const payload = {
+    username: user.username
+  };
+
+  const options = {
+    expiresIn: '1h'
+  };
+
+  const token = jwt.sign(payload, secrets.jwtSecret, options);
+  console.log(token)
+  return token;
+}
 
 module.exports = router;
