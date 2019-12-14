@@ -6,10 +6,15 @@ describe("server", () => {
     expect(process.env.DB_ENV).toBe("testing")
   })
 
-  describe("GET /api/jokes", () => {
-    it("should return 404", async () => {
-      const res = await request(server).get("/")
-      expect(res.status).toBe(404)
+  describe("/GET ", () => {
+    it("should return 401", async () => {
+      const res = await request(server).get("/api/jokes")
+      expect(res.status).toBe(401)
+    })
+
+    it("should return 401", async () => {
+      const res = await request(server).get("/api/auth/users")
+      expect(res.status).toBe(401)
     })
   })
 })
