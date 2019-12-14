@@ -1,8 +1,13 @@
 const router = require('express').Router();
 const Users = require("./auth-router-model")
+const bcrypt = require("bcryptjs")
 
 router.post('/register', (req, res) => {
-  Users.add(req.body)
+  let user = req.body
+  let hash = bcrypt.hashSync(user.password, 12)
+  user.password = hash
+
+  Users.add(user)
     .then(user => {
       console.log(user)
       res.status(200).json(user)
@@ -13,7 +18,18 @@ router.post('/register', (req, res) => {
 });
 
 router.post('/login', (req, res) => {
-  // implement login
+  let {username, password} = req.body
+
+  Users.findBy({username})
+    .first()
+    .then(user => {
+      if (user && bcrypt.compareSync(password, user.password)) {
+        res.status(200).json({message: "logged in!"})
+      }
+    })
+    .catch(err => {
+      res.status(500).json({error: err})
+    })
 });
 
 router.get("/users", (req, res) => {
